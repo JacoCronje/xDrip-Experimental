@@ -22,6 +22,7 @@ public class BgToSpeech {
     private final Context context;
 
     private TextToSpeech tts = null;
+    private boolean fallback;
 
     public static BgToSpeech setupTTS(Context context){
         if(instance == null) {
@@ -72,6 +73,7 @@ public class BgToSpeech {
                             || result == TextToSpeech.LANG_NOT_SUPPORTED) {
                         Log.e("BgToSpeech", "Default system language is not supported");
                         result = tts.setLanguage(Locale.ENGLISH);
+                        fallback = true;
                     }
                     //try any english
                     if (result == TextToSpeech.LANG_MISSING_DATA
@@ -119,7 +121,10 @@ public class BgToSpeech {
                 df.setMaximumFractionDigits(0);
                 text =  df.format(value);
             } else {
-                df = new DecimalFormat("##.#", new DecimalFormatSymbols(Locale.US));
+                if(fallback) {
+                    // in case of fallback ensure "." as decimal separator
+                    df = new DecimalFormat("##.#", new DecimalFormatSymbols(Locale.US));
+                }
                 df.setMaximumFractionDigits(1);
                 df.setMinimumFractionDigits(1);
                 text =  df.format(value* Constants.MGDL_TO_MMOLL);
